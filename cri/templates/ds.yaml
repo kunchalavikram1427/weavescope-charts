@@ -1,4 +1,3 @@
-# borrowed from https://cloud.weave.works/k8s/scope.yaml?k8s-version=1.10.0
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -11,6 +10,9 @@ metadata:
   namespace: weave
 spec:
   minReadySeconds: 5
+  selector:
+    matchLabels:
+      app: weave-scope
   template:
     metadata:
       labels:
@@ -19,6 +21,8 @@ spec:
         weave-cloud-component: scope
         weave-scope-component: agent
     spec:
+      imagePullSecrets: 
+      - name: registry-cred
       containers:
         - name: scope-agent
           args:
@@ -26,7 +30,7 @@ spec:
             - '--probe.docker=false'
             - '--probe.kubernetes=true'
             - '--probe.cri=true'
-            - '--probe.cri.endpoint=unix:///var/run/crio/crio.sock'
+            - '--probe.cri.endpoint=unix:///var/run/dockershim.sock'
             - 'weave-scope-app.weave.svc.cluster.local.:80'
           env:
             - name: KUBERNETES_NODENAME
@@ -34,13 +38,13 @@ spec:
                 fieldRef:
                   apiVersion: v1
                   fieldPath: spec.nodeName
-          image: weaveworks/scope:1.13.2
+          image: klstg-docker.slb-wartifactory-v.stg.rmn.local/weaveworks/scope:1.13.2
           imagePullPolicy: IfNotPresent
           securityContext:
             privileged: true
           volumeMounts:
             - name: cri-socket
-              mountPath: /var/run/crio/crio.sock
+              mountPath: /var/run/dockershim.sock
             - name: scope-plugins
               mountPath: /var/run/scope/plugins
             - name: sys-kernel-debug
@@ -55,7 +59,7 @@ spec:
       volumes:
         - name: cri-socket
           hostPath:
-            path: /var/run/crio/crio.sock
+            path: /var/run/dockershim.sock
         - name: scope-plugins
           hostPath:
             path: /var/run/scope/plugins

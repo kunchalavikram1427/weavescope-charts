@@ -1,0 +1,6 @@
+apiVersion: v2
+name: weavescope chart
+appVersion: "1.0"
+description: A Demo weavescope chart
+version: 1.0.0
+type: application

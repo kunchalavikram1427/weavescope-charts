@@ -1,4 +1,3 @@
-# borrowed from https://cloud.weave.works/k8s/scope.yaml?k8s-version=1.10.0
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -11,6 +10,9 @@ metadata:
   namespace: weave
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      app: weave-scope
   revisionHistoryLimit: 2
   template:
     metadata:
@@ -30,3 +32,7 @@ spec:
           ports:
             - containerPort: 4040
               protocol: TCP
+          resources:
+            requests:
+              cpu: 200m
+              memory: 200Mi
